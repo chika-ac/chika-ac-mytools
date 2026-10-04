@@ -1,68 +1,23 @@
-Sub 扶養検索データ取込()
+tool.xlsm
 
-    Dim wbSrc As Workbook
-    Dim wsSrc As Worksheet
-    Dim wsDest As Worksheet
-    Dim filePath As String
-    Dim lastRow As Long
-    Dim lastRow2 As Long
+総務事務センターポータル
 
-    Application.ScreenUpdating = False
-    Application.DisplayAlerts = False
+以下元ネタ
 
-    '取込先
-    Set wsDest = ThisWorkbook.Sheets("元データ")
+tool001.xlsm
+【正規】シフト管理
+tool002.xlsm
+【全種別】進捗集計
+tool003.xlsm
+【扶養】進捗管理
+tool004.xlsm
+イベント
+tool005.xlsm
+お知らせ
+tool006.xlsm
+会議予定
+tool007.xlsm
 
-    '同じフォルダの「扶養検索.xlsx」
-    filePath = ThisWorkbook.Path & "\扶養検索.xlsx"
-
-    '取込元を開く
-    Set wbSrc = Workbooks.Open(filePath)
-    Set wsSrc = wbSrc.Sheets(1)
-
-    '最終行取得
-    lastRow = wsSrc.Cells(wsSrc.Rows.Count, "A").End(xlUp).Row
-
-    '既存データ削除
-    wsDest.Range("A:AK").ClearContents
-
-    'A:AKを値貼り付け
-    wsDest.Range("A1:AK" & lastRow).Value = _
-        wsSrc.Range("A1:AK" & lastRow).Value
-
-    '取込元を閉じる（保存なし）
-    wbSrc.Close SaveChanges:=False
-
-    'AP列作成
-    lastRow2 = wsDest.Cells(wsDest.Rows.Count, 1).End(xlUp).Row
-
-    If lastRow2 >= 2 Then
-
-        wsDest.Range("AP2").Formula = _
-            "=IF(P2<>"""",""・添待ち"","""")" & _
-            "&IF(Q2<>"""",""・住民票"","""")" & _
-            "&IF(R2<>"""",""・発信"","""")" & _
-            "&IF(S2<>"""",""・確認事項"","""")" & _
-            "&IF(T2<>"""",""・管"","""")" & _
-            "&IF(U2<>"""",""・SV"","""")" & _
-            "&IF(V2<>"""",""・データ送付待ち"","""")" & _
-            "&IF(W2<>"""",""・削除"","""")"
-
-        wsDest.Range("AP2").AutoFill _
-            Destination:=wsDest.Range("AP2:AP" & lastRow2)
-
-        '数式→値変換
-        wsDest.Range("AP2:AP" & lastRow2).Value = _
-            wsDest.Range("AP2:AP" & lastRow2).Value
-
-    End If
-
-    '再計算
-    Application.CalculateFullRebuild
-
-    Application.ScreenUpdating = True
-    Application.DisplayAlerts = True
-
-    MsgBox "扶養検索データの取込が完了しました。"
-
-End Sub
+↓これはアプリから。
+進捗管理用元ネタ
+扶養検索_20261002
