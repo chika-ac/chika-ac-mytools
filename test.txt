@@ -1,138 +1,68 @@
-以下は、前回ご提案した変更を「そのままコピー＆ペーストで差し替え」できるようにまとめたものです。既存モジュールの該当箇所を置き換えてください。
+## 問い合わせ対応・年調開始に向けた運用変更
 
-――――――――――――――――――――
-1．定数の書き換え（モジュール冒頭）
+### 1．問い合わせボックスの運用変更
 
-vb
-Copy
-'（旧）Private Const SH_SAVE As String = "マスタ保存"
-'↓
-Private Const SH_SAVE As String = "元データから算出"
-――――――――――――――――――――
-2．FormatRows の数式設定をコメントアウト（モジュール中盤）
+**10/13（月）から先行して新運用を開始し、10/16（金）の年調開始以降は本番運用とします。**
 
-vb
-Copy
-Private Sub FormatRows(ws As Worksheet, ByVal nRows As Long, ByVal nCols As Long, rowType() As Long, ByVal stdCol As Long)
-    Dim first As Long, lastR As Long, i As Long, r As Long, sm As String
-    first = LIST_HDR + 1
-    lastR = LIST_HDR + nRows
-    sm = "'" & SH_MAP & "'!"
+* 「SV確認」ボックスを撤去します。
+* 「発信依頼」に入っている案件は、原則として各自で取りに行き、内容を確認のうえ架電してください。
+* 架電後は「完了」ボックスへ移動してください。
+* SVによる完了確認は行いません。
+* ただし、習得状況や個別の事情により、すぐに新運用へ切り替えることが難しい場合があります。その場合は、SV・SV補の判断で対応方法が異なることがあります。**全員一律に必ず同じ動きをする、という趣旨ではありません。**
 
-    ws.Range(ws.Cells(first, 1), ws.Cells(lastR, nCols)).Font.Size = 10
-    ws.Range(ws.Cells(first, stdCol), ws.Cells(lastR, nCols)).HorizontalAlignment = xlRight
-    ws.Range(ws.Cells(first, stdCol), ws.Cells(lastR, nCols)).NumberFormatLocal = "0.00"
-    ws.Range(ws.Cells(first, stdCol), ws.Cells(lastR, stdCol)).NumberFormatLocal = "0.0#"
-    ws.Range(ws.Cells(first, stdCol), ws.Cells(lastR, stdCol)).Font.Color = RGB(118, 118, 118)
+### 2．年調開始までの確認先
 
-    For i = 1 To nRows
-        r = LIST_HDR + i
-        Select Case rowType(i)
-            Case 4
-                '（中略）既存コードのまま
-            Case 1
-                '（中略）既存コードのまま
-            Case 2
-                ' 個人の大分類行：標準値の自動数式設定を削除しました
-                With ws.Range(ws.Cells(r, 1), ws.Cells(r, nCols))
-                    .Font.Bold = True
-                    .Borders(xlEdgeTop).LineStyle = xlContinuous
-                    .Borders(xlEdgeTop).Color = RGB(89, 89, 89)
-                End With
-                ws.Range(ws.Cells(r, 1), ws.Cells(r, stdCol)).Interior.Color = RGB(221, 235, 247)
-                ' ↓ 以下の数式設定をコメントアウトまたは削除
-                ' ws.Cells(r, stdCol).Formula = "=IFERROR(AVERAGEIFS(" & sm & "$" & ColLetter(STD_VAL) & ":$" & ColLetter(STD_VAL) & "," & _
-                '     sm & "$" & ColLetter(STD_STAGE) & ":$" & ColLetter(STD_STAGE) & ",$A" & r & "," & _
-                '     sm & "$" & ColLetter(STD_MT) & ":$" & ColLetter(STD_MT) & ",$B" & r & "),"""")"
-            Case 3
-                ' 個人の業務行：標準値の自動数式設定を削除しました
-                ws.Range(ws.Cells(r, 1), ws.Cells(r, 2)).Font.Color = RGB(166, 166, 166)
-                ws.Cells(r, 3).IndentLevel = 1
-                ' ↓ 以下の数式設定をコメントアウトまたは削除
-                ' ws.Cells(r, stdCol).Formula = "=IFERROR(AVERAGEIFS(" & sm & "$" & ColLetter(MC_STD) & ":$" & ColLetter(MC_STD) & "," & _
-                '     sm & "$" & ColLetter(MC_STAGE) & ":$" & ColLetter(MC_STAGE) & ",$A" & r & "," & _
-                '     sm & "$" & ColLetter(MC_DISP) & ":$" & ColLetter(MC_DISP) & ",$C" & r & "),"""")"
-            Case 5
-                '（中略）既存コードのまま
-            Case 6
-                '（中略）既存コードのまま
-        End Select
-    Next
-End Sub
-――――――――――――――――――――
-3．RunBuild の末尾へ「自動算出シート出力＋差分メモ追記」コードを追加
+**10/15（木）までは**、不明点や自分の理解が正しいか確認したい場合は、**KTペア**に確認してください。
 
-vb
-Copy
-Public Function RunBuild(Optional ByVal silent As Boolean = False) As String
-    ' （中略）既存の RunBuild 全体
+**10/16（金）の年調開始後**は、以下を確認先とします。
 
-    ' 最後に以下を追記してください。
+* 通勤：田中さん
+* 扶養：西村さん
+* 給与・住居：栗城さん
 
-    ' --- 自動算出標準値を「元データから算出」シート(SH_SAVE)へ出力
-    Dim wsMap As Worksheet, wsCalc As Worksheet
-    Dim lastMap As Long, r As Long
-    Set wsMap  = ThisWorkbook.Worksheets(SH_MAP)
-    Set wsCalc = ThisWorkbook.Worksheets(SH_SAVE)
+SV・SV補から元ヘルプのメンバーへ確認をお願いする場合がありますので、その際はご協力ください。
 
-    ' シートクリア＆ヘッダ
-    With wsCalc
-      .Cells.Clear
-      .Range("A1:C1").Value = Array("業務ID", "工程×大分類", "自動算出標準（件/時）")
-    End With
+### 3．年調開始後の電話対応
 
-    ' マスタ_業務・標準の行をループして、平均値を計算・出力
-    lastMap = LastRow(wsMap, MC_ID)
-    For r = 2 To lastMap
-      Dim id As String, stg As String, mt As String, key As String
-      Dim totalCnt As Double, totalHrs As Double, avgRate As Double
+**10/16（金）から**、基本的にどこが鳴動しているかを見て、割り当てられた優先順位に沿って受電します。
 
-      id  = wsMap.Cells(r, MC_ID).Value
-      stg = wsMap.Cells(r, MC_STAGE).Value
-      mt  = wsMap.Cells(r, MC_MT).Value
-      key = stg & "|" & mt
+* 第一：藤本さん
+* 年調：穂満さん
+* その他：八木さん
+* 給与2種：島さん・大場さん・三浦さんの当番制
+* **当番にかかわらず、給与2種が溢れている場合は、管理・SV・SV補も1次受けしてください。**
+* その他の受電が溢れている場合も、状況に応じて管理・SV・SV補が1次受けします。
 
-      ' dayAgg と所要時間集計：RunBuild 内で定義済みの dayAgg, ds, etc. を想定
-      totalCnt = 0: totalHrs = 0
-      ' ds: 集計対象日付の配列、dayAgg(k)=(件数, 時間)
-      For Each d In ds
-        Dim arr As Variant
-        If dayAgg.Exists(id & "|" & d & "|" & key) Then
-          arr = dayAgg(id & "|" & d & "|" & key)
-          totalCnt = totalCnt + arr(0)
-          totalHrs = totalHrs + arr(1)
-        End If
-      Next
-      If totalHrs > 0 Then
-        avgRate = totalCnt / totalHrs
-      Else
-        avgRate = 0
-      End If
+### 4．午後の受領発送業務
 
-      wsCalc.Cells(r, 1).Value = id
-      wsCalc.Cells(r, 2).Value = key
-      wsCalc.Cells(r, 3).Value = Round(avgRate, 2)
-    Next
+現在も電話当番に午後の受領発送業務を割り振っています。
 
-    ' --- マスタ登録値（MC_STD）と自動算出値（wsCalc列3）を比較、
-    '     差があればマスタ_業務・標準のメモ列(MC_MEMO)に追記
-    For r = 2 To lastMap
-      Dim manualStd As Variant, autoStd As Variant
-      manualStd = wsMap.Cells(r, MC_STD).Value
-      autoStd   = wsCalc.Cells(r, 3).Value
-      If manualStd <> autoStd Then
-        wsMap.Cells(r, MC_MEMO).Value = _
-          wsMap.Cells(r, MC_MEMO).Value & _
-          "【自動基準:" & autoStd & "との差異】"
-      End If
-    Next
+本来は電話対応を優先してほしいところですが、受領発送の時間帯は別業務として手伝ってもらっています。**10/16（金）以降も、受領発送のため電話当番が離席する場合があります。**
 
-    '（既存の Notify や終了処理など）
-End Function
-――――――――――――
-以上を適用すれば、
+その場合は、**元ヘルプのメンバーも給与が鳴ったら受電してください。**
 
-マスタ_業務・標準の H 列（MC_STD）は上書きされず管理者入力値を保持
-自動算出した平均標準値は「元データから算出」シートに出力
-両者の差分はマスタのメモ列に自動で追記
-という振る舞いになります。コピー＆ペーストで該当部分を差し替え、動作をご確認ください。
+### 5．電話を取れない場合
+
+**10/16（金）以降、その時間帯の受電優先順位が割り当てられている人・当番の人**は、電話を取れない場合、周囲に「お願いします！」と声をかけてください。
+
+誰かが取る準備をしているのか、対応できない状況なのかは、周囲からは判断できません。
+**鳴動したままにせず、必ず声かけをお願いします。**
+
+### 6．CCPの記録について
+
+**10/16（金）以降、CCPを見れば状況が分かる状態**を意識してください。
+
+会話でのコミュニケーションが取りにくい場面も増えるため、対応内容や状況はしっかり記録してください。
+
+「エスカレ中」にする場合は、ホットボイスに
+**「○○さんへエスカレ済」**
+のように、誰にエスカレしたのかを記載してください。
+
+**誰がボールを持っているのか、次に何をするのかが、CCPを見れば分かる状態**にしてください。
+
+### 7．大迫さんの電話対応
+
+* **10/16（金）～10/20（火）**：年調優先2で受電
+* **10/21（水）～10/25（日）**：派遣さん研修のため電話対応なし
+* **10/25（日）以降**：出勤後～9時頃、17時頃～退勤までは基本的に電話対応
+* ※状況により変更する場合があります。
