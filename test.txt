@@ -1,1 +1,10 @@
-=IF(ISNUMBER(U$4),IF(U$4<TODAY(),U5,IF(U$4=TODAY(),XLOOKUP(1,($F$4:$NZ$4<=TODAY())*ISNUMBER($F$5:$NZ$5),$F$5:$NZ$5,"",0,-1),IF(ISNUMBER(T10),MAX(0,T10+N(U8)-IF(OR(WEEKDAY(U$4,2)>5,COUNTIF(休日一覧!$A:$A,U$4)>0,NOT(ISNUMBER(U8))),0,N($E$5))),""))),"")
+変更前（2行）
+
+If (Not pEx(j) And (skillVal.Exists(BKey(b) & "|" & pEid(j)) Or mFutureHP.Exists(BKey(b) & "|" & pEid(j)))) _
+    Or (pEx(j) And (skCnt.Exists(BKey(b) & "|" & pEid(j)) Or skMin.Exists(BKey(b) & "|" & pEid(j)))) Then
+変更後（コメント1行＋条件1行）
+
+' 除外（スキルマップの除外○）の人は詳細に出さない
+If Not pEx(j) And (skillVal.Exists(BKey(b) & "|" & pEid(j)) Or mFutureHP.Exists(BKey(b) & "|" & pEid(j))) Then
+続く r = r + 1: rKind(r) = "H"… 以降は、そのままです。反映後に「詳細を更新」を実行してください。
+影響
