@@ -1,10 +1,27 @@
-変更前（2行）
+1. 列数を1つ増やす
 
-If (Not pEx(j) And (skillVal.Exists(BKey(b) & "|" & pEid(j)) Or mFutureHP.Exists(BKey(b) & "|" & pEid(j)))) _
-    Or (pEx(j) And (skCnt.Exists(BKey(b) & "|" & pEid(j)) Or skMin.Exists(BKey(b) & "|" & pEid(j)))) Then
-変更後（コメント1行＋条件1行）
 
-' 除外（スキルマップの除外○）の人は詳細に出さない
-If Not pEx(j) And (skillVal.Exists(BKey(b) & "|" & pEid(j)) Or mFutureHP.Exists(BKey(b) & "|" & pEid(j))) Then
-続く r = r + 1: rKind(r) = "H"… 以降は、そのままです。反映後に「詳細を更新」を実行してください。
-影響
+lastC = 10 + pfNW        ' 以前は 9 + pfNW
+2. 見出し
+
+
+a(4, 6) = "全員の" & vbLf & "期間平均": a(4, 7) = "全員の" & vbLf & "最低": a(4, 8) = "全員の" & vbLf & "最高": a(4, 9) = "件数": a(4, 10) = "時間(h)"
+a(4, 11 + x) = PerfWeekLabel(x)     ' 週の列は11列目から(以前は10列目)
+3. 値の入れ方
+
+
+If Not IsEmpty(s(4)) Then a(r, 6) = s(4)    ' 全員の期間平均(追加。s(4)は届出×工程の全体平均)
+If Not IsEmpty(s(1)) Then a(r, 7) = s(1)    ' 全員の最低
+If Not IsEmpty(s(2)) Then a(r, 8) = s(2)    ' 全員の最高
+a(r, 9) = cc: a(r, 10) = Round(hh, 2)       ' 件数・時間
+If hh > 0 Then a(r, 11 + x) = cc / hh Else a(r, 11 + x) = "-"    ' 週別
+4. 列の幅・数字の形式・色付けを、1列分ずらす
+
+列幅は、3〜10列目を10、11列目以降を12にします。
+NumberFormat は、6〜8列目が 0.0、9列目が #,##0、10列目が 0.0、11列目以降が 0.0 です。
+週別の色付けは、a(r, 11 + x) と w.Cells(r, 11 + x) を使うようにしました。
+5. 注記の1行を差し替え
+
+
+"・全員の期間平均は、同じ届出×工程・同じ期間の、全員の合計件数÷合計時間です。全員の最低・最高は、稼働のあった人の期間平均の最低・最高です(人の名前は出していません)。", _
+反映前のバックアップは 00.old/tool_before_perfavg_20261029.xlsm です。
